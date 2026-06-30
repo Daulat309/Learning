@@ -1,0 +1,1531 @@
+Topic 1: Client Interaction (Browser → Server Journey)
+1. Concept Overview
+Definition
+
+Client Interaction is the complete process of how a user's request travels from their device (browser/mobile app) to a server and how the response comes back.
+
+In simple words:
+
+Everything that happens after you type a URL or click a button until you see the webpage.
+
+Example:
+
+You type:
+
+www.amazon.com
+
+↓
+
+Browser contacts DNS
+
+↓
+
+Gets IP Address
+
+↓
+
+Request reaches Load Balancer
+
+↓
+
+Load Balancer picks a Server
+
+↓
+
+Server checks Cache
+
+↓
+
+If needed queries Database
+
+↓
+
+Response comes back
+
+↓
+
+Browser renders page
+Why does it exist?
+
+A browser cannot directly "know"
+
+where the server is
+which server to contact
+where the data lives
+how to receive the response
+
+Many systems work together.
+
+Real World Analogy
+
+Imagine ordering food.
+
+You
+
+↓
+
+Receptionist
+
+↓
+
+Kitchen
+
+↓
+
+Chef
+
+↓
+
+Storage
+
+↓
+
+Food prepared
+
+↓
+
+Waiter
+
+↓
+
+You receive food
+
+Computer systems work similarly.
+
+Restaurant	Computer
+Customer	Client
+Receptionist	DNS
+Manager	Load Balancer
+Kitchen	Web Server
+Storage	Database
+Pantry	Cache
+Food	Response
+Where is it used?
+
+Every website.
+
+Examples:
+
+Google Search
+Netflix
+Instagram
+Amazon
+Uber
+LinkedIn
+Facebook
+Why Interviewers Ask It
+
+Because almost every system design problem starts with:
+
+"A user sends a request..."
+
+If you don't understand the request lifecycle, later topics like caching, API gateways, CDNs, load balancers, and databases are much harder to reason about.
+
+2. Core Concepts
+What is a Client?
+
+The client is the software requesting a service.
+
+Examples:
+
+Chrome
+Firefox
+Mobile App
+Smart TV App
+Client
+
+↓
+
+Request
+What is a Server?
+
+A server receives requests and sends responses.
+
+Client
+
+↓
+
+Server
+
+↓
+
+Response
+What is HTTP?
+
+HTTP is the language used by clients and servers to communicate.
+
+Example:
+
+GET /products
+
+Server replies
+
+200 OK
+
+Product List
+What is HTTPS?
+
+HTTP + Encryption.
+
+Uses TLS/SSL.
+
+Interview Tip:
+
+Always mention HTTPS in modern architectures.
+
+Request
+
+A request asks the server for something.
+
+Example
+
+GET /users
+
+POST /login
+
+PUT /cart
+
+DELETE /product
+Response
+
+The server returns
+
+Data
+Status
+Headers
+
+Example
+
+Status
+
+200 OK
+
+Body
+
+{
+name:"John"
+}
+Stateless Communication
+
+Each HTTP request is independent.
+
+The server doesn't automatically remember previous requests.
+
+Example
+
+Login
+
+↓
+
+Next Request
+
+↓
+
+Server doesn't remember unless
+session/token exists.
+
+Interview Tip:
+
+HTTP is stateless. State is usually maintained with sessions, cookies, or tokens.
+
+Cookies
+
+Stored inside browser.
+
+Used for
+
+Login
+Preferences
+Sessions
+Sessions
+
+Stored on server.
+
+Browser stores only Session ID.
+
+Browser
+
+SessionID
+
+↓
+
+Server
+
+Actual User Data
+JWT Tokens
+
+Modern applications mostly use JWT.
+
+Browser
+
+↓
+
+JWT
+
+↓
+
+Server verifies token
+
+↓
+
+No session lookup needed
+3. Internal Working
+Simple Explanation
+
+You type
+
+amazon.com
+
+Browser says
+
+"I don't know where Amazon lives."
+
+So it asks DNS.
+
+DNS replies
+
+54.231.xxx.xx
+
+Browser sends request.
+
+Request reaches Load Balancer.
+
+Load Balancer selects one server.
+
+Server checks cache.
+
+If cache miss
+
+↓
+
+Database
+
+↓
+
+Gets data
+
+↓
+
+Returns response
+
+Browser renders page.
+
+Technical Flow
+User
+
+↓
+
+Browser
+
+↓
+
+DNS Lookup
+
+↓
+
+TCP Connection
+
+↓
+
+TLS Handshake (HTTPS)
+
+↓
+
+HTTP Request
+
+↓
+
+Load Balancer
+
+↓
+
+Application Server
+
+↓
+
+Cache
+
+↓
+
+Database
+
+↓
+
+Application Server
+
+↓
+
+HTTP Response
+
+↓
+
+Browser Rendering
+4. Architecture / Flow
+Complete Architecture
+                User
+                  │
+                  ▼
+            Web Browser
+                  │
+                  ▼
+             DNS Lookup
+                  │
+                  ▼
+          IP Address Found
+                  │
+                  ▼
+          TCP + TLS Handshake
+                  │
+                  ▼
+          HTTP Request
+                  │
+                  ▼
+          Load Balancer
+          ┌──────┴──────┐
+          ▼             ▼
+      Server A      Server B
+          │             │
+          └──────┬──────┘
+                 ▼
+               Cache
+                 │
+        Cache Hit? ── Yes ──► Return Data
+                 │
+                No
+                 ▼
+             Database
+                 │
+                 ▼
+           Server Response
+                 │
+                 ▼
+              Browser
+                 │
+                 ▼
+           Render HTML/CSS/JS
+Component Explanation
+Component	Purpose
+Browser	Sends request
+DNS	Finds server IP
+TCP	Establishes reliable connection
+TLS	Encrypts communication
+HTTP	Transfers request/response
+Load Balancer	Distributes requests
+Server	Executes business logic
+Cache	Fast data retrieval
+Database	Persistent storage
+Browser Renderer	Displays the page
+5. Advantages
+Separation of Responsibilities
+
+Each component has one job.
+
+Example:
+
+DNS only resolves names.
+
+Load Balancer only distributes traffic.
+
+This modularity makes systems easier to scale and maintain.
+
+Scalability
+
+You can add more servers behind the load balancer as traffic grows.
+
+Security
+
+HTTPS encrypts data between client and server, protecting passwords and personal information.
+
+Reliability
+
+If one server fails, the load balancer can send traffic to another healthy server.
+
+6. Disadvantages
+Network Latency
+
+Every hop adds delay.
+
+Browser
+↓
+
+DNS
+↓
+
+Load Balancer
+↓
+
+Server
+↓
+
+Database
+
+More hops → More latency.
+
+Single Points of Failure
+
+Without redundancy, a failure in DNS, load balancer, or database can make the service unavailable.
+
+Complexity
+
+Modern systems include many layers, making debugging and operations more challenging.
+
+7. Trade-offs
+Approach	Pros	Cons	Use When
+Direct Client → Server	Simple	Doesn't scale well	Small applications
+Client → Load Balancer → Servers	Scalable, fault tolerant	Extra infrastructure	Medium/Large systems
+CDN → Load Balancer → Servers	Faster for global users	Higher cost	Global applications
+8. Real-world Examples
+Google: Browser → Global DNS → Edge servers → Load balancers → Search services → Index databases.
+Amazon: Browser → DNS → CDN → Load balancer → Product service → Cache → Database.
+Netflix: App → CDN → API Gateway → Microservices → Databases.
+Uber: App → API Gateway → Ride service → Location service → Databases.
+LinkedIn: Browser → Load balancer → Feed service → Cache → Databases.
+9. Interview Deep Dive
+Common Interview Questions
+What happens when you type google.com into a browser?
+Explain the complete request lifecycle.
+Why is DNS needed?
+Why use HTTPS instead of HTTP?
+What is a TCP handshake?
+Why is HTTP stateless?
+What are cookies, sessions, and JWTs?
+Why use a load balancer?
+Where does caching fit into the flow?
+How is a webpage rendered after the response arrives?
+Follow-up Questions
+What happens if DNS is unavailable?
+How are repeated requests optimized?
+How does a browser reuse TCP connections?
+What is Keep-Alive?
+How do browsers cache responses?
+Hidden Edge Cases
+DNS cache expiration (TTL).
+Load balancer health checks.
+Cache misses and stale cache.
+Session stickiness in load-balanced environments.
+Partial failures during database access.
+Frequently Misunderstood Concepts
+HTTP is stateless, but applications can maintain state.
+HTTPS secures data in transit, not data stored on the server.
+DNS resolves names to IP addresses, it does not route packets.
+10. Important Terminology
+Term	Meaning
+Client	Request sender
+Server	Request processor
+Request	Message from client to server
+Response	Message from server to client
+HTTP	Application-layer protocol for web communication
+HTTPS	HTTP over encrypted TLS
+DNS	Domain Name System
+TCP	Reliable transport protocol
+TLS	Encryption protocol for secure communication
+Cache	Fast temporary storage
+Load Balancer	Traffic distributor
+Latency	Time taken for a request
+Throughput	Requests processed per second
+11. Time Complexity / Performance
+Metric	Impact
+Time Complexity	Not algorithm-specific; depends on application logic
+Space Complexity	Depends on request/response payloads
+Latency	Sum of DNS, network, processing, and rendering times
+Throughput	Number of requests handled per second
+Scalability	Improved with load balancing, caching, and horizontal scaling
+12. Common Mistakes
+Forgetting the DNS lookup.
+Ignoring the TCP and TLS handshakes.
+Assuming HTTP remembers previous requests.
+Forgetting browser caching.
+Ignoring load balancing in scalable systems.
+Mixing up cookies, sessions, and JWTs.
+Forgetting that rendering also takes time after the response arrives.
+13. Revision Sheet
+Client sends HTTP/HTTPS request.
+DNS resolves the domain name to an IP address.
+TCP establishes a reliable connection.
+TLS secures the connection (HTTPS).
+Load balancer selects a healthy server.
+Server executes business logic.
+Cache is checked before the database.
+Database is accessed on a cache miss.
+Server returns an HTTP response.
+Browser renders HTML, CSS, and JavaScript.
+14. Memory Tricks
+
+D-T-T-H-L-S-C-D-R
+
+Think:
+
+DNS → TCP → TLS → HTTP → Load Balancer → Server → Cache → Database → Response
+
+Mnemonic:
+
+"Don't Trust Tiny Hackers; Load Servers, Cache Data, Respond."
+
+15. Interview Questions
+10 Basic
+What is a client?
+What is a server?
+What is HTTP?
+What is HTTPS?
+What is DNS?
+What is a request?
+What is a response?
+What is latency?
+What is a cache?
+What is a load balancer?
+15 Medium
+Explain the browser request lifecycle.
+Why is HTTP stateless?
+How do cookies differ from sessions?
+What is JWT?
+Why is HTTPS more secure?
+Explain the TCP three-way handshake.
+What is TLS?
+What is browser caching?
+How does DNS caching work?
+Why use Keep-Alive?
+What is connection pooling?
+How does a load balancer improve availability?
+What happens on a cache miss?
+What is server-side rendering?
+How does compression reduce latency?
+10 Advanced
+How does HTTP/2 improve performance?
+Compare HTTP/2 and HTTP/3.
+Explain TLS session resumption.
+What is head-of-line blocking?
+How do CDNs affect request flow?
+Explain connection multiplexing.
+What is Anycast DNS?
+How do reverse proxies fit into the architecture?
+How are retries handled safely?
+How would you optimize request latency globally?
+5 Scenario-based
+Your website is slow only on the first request. What components would you investigate?
+DNS lookups are failing intermittently. How would you troubleshoot?
+Users report slow page loads despite fast APIs. Where might the bottleneck be?
+Traffic suddenly doubles. Which components need to scale?
+Login works, but subsequent requests fail authentication. What could be wrong?
+5 MCQs
+Which component translates a domain name to an IP address?
+Answer: DNS
+Which protocol encrypts web traffic?
+Answer: HTTPS (using TLS)
+Which component distributes requests across servers?
+Answer: Load Balancer
+Which storage is checked before the database for faster reads?
+Answer: Cache
+Which protocol provides reliable, ordered delivery?
+Answer: TCP
+16. Coding Connections
+Area	Connection
+Backend Development	Request handling, controllers, REST APIs
+Spring Boot	DispatcherServlet, filters, interceptors, REST endpoints
+Distributed Systems	Load balancing, retries, service communication
+Databases	Queries after cache misses
+Networking	DNS, TCP, TLS, HTTP
+Operating Systems	Socket management, threads, process scheduling
+17. Related Topics
+
+Study these next, in order:
+
+DNS System
+TCP/IP Fundamentals
+HTTP vs HTTPS
+Vertical Scaling
+Horizontal Scaling
+Load Balancer
+Reverse Proxy
+API Gateway
+Cache
+CDN
+18. Cheat Sheet
+User
+  │
+Browser
+  │
+DNS
+  │
+TCP
+  │
+TLS
+  │
+HTTP Request
+  │
+Load Balancer
+  │
+Application Server
+  │
+Cache
+  │
+Database
+  │
+HTTP Response
+  │
+Browser Rendering
+
+Remember:
+
+HTTP is stateless.
+HTTPS = HTTP + TLS.
+Cache before database.
+Load balancer before application servers.
+DNS resolves names, not routes.
+19. Placement Rating
+Metric	Rating	Why
+Importance	★★★★★	Foundation of all web systems
+Interview Frequency	★★★★★	Common in almost every system design interview
+Difficulty	★★☆☆☆	Easy conceptually, but depth matters in interviews
+20. Final Interview Summary
+
+If you remember only five things before an interview:
+
+Every request starts with DNS, which converts a domain name into an IP address.
+HTTP is stateless; sessions, cookies, or JWTs are used to maintain user state.
+HTTPS uses TLS to encrypt communication between the client and server.
+The request path is typically: Browser → DNS → TCP/TLS → Load Balancer → Server → Cache → Database → Response.
+Performance is improved by caching, load balancing, and efficient network communication, not just faster code.
+Next Topic
+
+The next topic should be DNS System, where we'll explore DNS resolution, recursive vs. iterative queries, authoritative and recursive resolvers, caching, TTL, root/TLD/name servers, Anycast DNS, failure scenarios, and interview-focused design questions in similar depth.
+
+answer those questions
+
+Great idea. Answering these questions is one of the best ways to prepare for placements.
+
+I'll answer all the interview questions from the Client Interaction topic.
+
+Basic Questions
+1. What is a Client?
+
+A client is a software application or device that requests a service from another computer.
+
+Examples:
+
+Chrome Browser
+Firefox
+Mobile App
+Desktop Application
+
+Example:
+
+You open Instagram.
+
+Instagram App → sends request → Instagram Server
+
+The app is the client.
+
+2. What is a Server?
+
+A server is a computer that receives requests from clients, processes them, and returns responses.
+
+Example:
+
+Client
+   │
+Request
+   │
+Server
+   │
+Response
+
+Examples:
+
+Web Server
+Database Server
+Mail Server
+File Server
+3. What is HTTP?
+
+HTTP (HyperText Transfer Protocol) is the protocol used for communication between clients and servers.
+
+Example:
+
+GET /products
+
+Server replies
+
+200 OK
+
+Product List
+
+HTTP is:
+
+Stateless
+Application Layer Protocol
+Request-Response based
+4. What is HTTPS?
+
+HTTPS is HTTP over TLS (Transport Layer Security).
+
+It encrypts communication.
+
+Without HTTPS:
+
+Password
+
+↓
+
+Anyone on network can read it
+
+With HTTPS
+
+Password
+
+↓
+
+Encrypted
+
+↓
+
+Only server can decrypt
+
+Interview line:
+
+HTTPS = HTTP + TLS Encryption
+
+5. What is DNS?
+
+DNS (Domain Name System) converts domain names into IP addresses.
+
+Example:
+
+google.com
+
+↓
+
+142.250.xx.xx
+
+Why?
+
+Computers understand IP addresses, not names.
+
+6. What is a Request?
+
+A request is a message sent by the client asking for some resource.
+
+Example:
+
+GET /profile
+
+or
+
+POST /login
+
+A request contains:
+
+URL
+Method
+Headers
+Body (optional)
+7. What is a Response?
+
+A response is what the server sends back.
+
+Example:
+
+Status Code
+
+200 OK
+
+Headers
+
+Body
+
+Example Body
+
+{
+"name":"Alice"
+}
+8. What is Latency?
+
+Latency is the time taken for a request to travel from client to server and back.
+
+Example:
+
+Request
+
+↓
+
+150 ms
+
+↓
+
+Response
+
+Lower latency = Faster website
+
+9. What is Cache?
+
+Cache stores frequently used data in fast memory.
+
+Instead of
+
+Server
+
+↓
+
+Database
+
+we do
+
+Server
+
+↓
+
+Cache
+
+↓
+
+Database (only if needed)
+
+Benefits
+
+Faster
+Less DB load
+Lower latency
+10. What is a Load Balancer?
+
+A load balancer distributes requests among multiple servers.
+
+Without LB
+
+1000 users
+
+↓
+
+One Server
+
+With LB
+
+1000 users
+
+↓
+
+Load Balancer
+
+↓
+
+Server A
+
+Server B
+
+Server C
+Medium Questions
+1. Explain the Browser Request Lifecycle.
+
+Complete flow:
+
+User
+
+↓
+
+Browser
+
+↓
+
+DNS Lookup
+
+↓
+
+TCP Handshake
+
+↓
+
+TLS Handshake
+
+↓
+
+HTTP Request
+
+↓
+
+Load Balancer
+
+↓
+
+Application Server
+
+↓
+
+Cache
+
+↓
+
+Database
+
+↓
+
+Response
+
+↓
+
+Browser Rendering
+
+Interview Tip:
+
+Always explain this sequence in order.
+
+2. Why is HTTP Stateless?
+
+Each request is independent.
+
+Server forgets previous requests.
+
+Example
+
+Request 1
+
+Login
+
+↓
+
+Done
+
+Request 2
+
+Server doesn't remember login
+
+State is maintained using
+
+Cookies
+Sessions
+JWT
+3. Difference between Cookies and Sessions?
+Cookies	Sessions
+Stored in browser	Stored in server
+Small data	Large data
+Faster	More secure
+Client side	Server side
+
+Example
+
+Cookie
+
+theme=dark
+
+Session
+
+User Profile
+Shopping Cart
+Permissions
+4. What is JWT?
+
+JWT = JSON Web Token
+
+Instead of storing session on server
+
+Server gives token
+
+Login
+
+↓
+
+Server
+
+↓
+
+JWT
+
+↓
+
+Browser stores JWT
+
+↓
+
+Every request sends JWT
+
+Server verifies token.
+
+No session lookup.
+
+Great for microservices.
+
+5. Why HTTPS is Better than HTTP?
+
+HTTP
+
+Readable
+
+HTTPS
+
+Encrypted
+
+Protects
+
+Passwords
+Credit Cards
+Cookies
+6. Explain TCP Three-Way Handshake.
+
+Connection establishment.
+
+Client
+
+SYN
+
+↓
+
+Server
+
+SYN+ACK
+
+↓
+
+Client
+
+ACK
+
+Now connection established.
+
+Purpose
+
+Synchronization
+Reliability
+Initial sequence numbers
+7. What is TLS?
+
+TLS encrypts communication.
+
+It provides
+
+Encryption
+Authentication
+Integrity
+
+Think
+
+HTTP
+
+↓
+
+TLS
+
+↓
+
+Secure Communication
+8. What is Browser Cache?
+
+Browser stores
+
+Images
+CSS
+JavaScript
+
+Next visit
+
+Instead of downloading
+
+Browser uses cached copy.
+
+Much faster.
+
+9. How does DNS Cache Work?
+
+Suppose
+
+google.com
+
+↓
+
+142.xx.xx.xx
+
+Browser remembers.
+
+Next time
+
+No DNS lookup.
+
+This continues until
+
+TTL expires.
+
+10. Why use Keep-Alive?
+
+Without Keep-Alive
+
+Every request
+
+TCP Connection
+
+↓
+
+Close
+
+With Keep-Alive
+
+One TCP connection
+
+Multiple HTTP requests.
+
+Less latency.
+
+11. What is Connection Pooling?
+
+Instead of creating database connections repeatedly
+
+Application keeps ready-made connections.
+
+App
+
+↓
+
+Connection Pool
+
+↓
+
+Database
+
+Benefits
+
+Faster
+Lower overhead
+12. How does Load Balancer Improve Availability?
+
+Suppose
+
+Server A crashes
+
+LB automatically routes traffic
+
+Server B
+
+Server C
+
+Website remains available.
+
+13. What happens on Cache Miss?
+
+Flow
+
+Cache
+
+↓
+
+Miss
+
+↓
+
+Database
+
+↓
+
+Return data
+
+↓
+
+Store in cache
+
+↓
+
+Return response
+
+Next request
+
+Cache Hit.
+
+14. What is Server Side Rendering?
+
+Instead of browser creating HTML
+
+Server creates HTML.
+
+Example
+
+Browser
+
+↓
+
+Server
+
+↓
+
+HTML Generated
+
+↓
+
+Browser
+
+Advantages
+
+Better SEO
+Faster first page load
+15. How does Compression Reduce Latency?
+
+Instead of
+
+5 MB
+
+Compress
+
+700 KB
+
+Less network transfer.
+
+Common algorithms
+
+Gzip
+Brotli
+Advanced Questions
+1. How does HTTP/2 improve performance?
+
+Features:
+
+Multiplexing (multiple requests on one TCP connection)
+Header Compression (HPACK)
+Server Push (less common today)
+Stream prioritization
+
+No need for many parallel TCP connections.
+
+2. HTTP/2 vs HTTP/3?
+HTTP/2	HTTP/3
+Uses TCP	Uses QUIC (UDP-based)
+Suffers TCP head-of-line blocking	Avoids transport-level head-of-line blocking
+Mature	Faster on unreliable networks
+3. What is TLS Session Resumption?
+
+Normally
+
+TLS handshake is expensive.
+
+Session resumption lets client reuse previous cryptographic information, reducing handshake time and improving latency.
+
+4. What is Head-of-Line Blocking?
+
+If one packet is lost in TCP
+
+All later packets wait.
+
+Packet 1 ✔
+
+Packet 2 Lost
+
+Packet 3 Wait
+
+Packet 4 Wait
+
+HTTP/3 using QUIC reduces this issue.
+
+5. How do CDNs Affect Request Flow?
+
+Instead of
+
+India
+
+↓
+
+USA Server
+
+Use
+
+India
+
+↓
+
+Nearby CDN
+
+↓
+
+Content
+
+Lower latency.
+
+6. Explain Connection Multiplexing.
+
+HTTP/2
+
+One TCP connection
+
+Image
+
+CSS
+
+JS
+
+API
+
+All simultaneously
+
+Better utilization.
+
+7. What is Anycast DNS?
+
+Many DNS servers advertise the same IP address.
+
+Network routing automatically sends your request to the nearest or best-performing server.
+
+Benefits:
+
+Lower latency
+Higher availability
+Better fault tolerance
+8. How do Reverse Proxies Fit into the Architecture?
+Client
+
+↓
+
+Reverse Proxy
+
+↓
+
+Servers
+
+Responsibilities
+
+SSL termination
+Caching
+Compression
+Load balancing
+Security
+
+Common examples:
+
+NGINX
+HAProxy
+9. How are Retries Handled Safely?
+
+Retries can create duplicate operations.
+
+Example
+
+Payment
+
+↓
+
+Timeout
+
+↓
+
+Retry
+
+↓
+
+Double Payment ❌
+
+Solution
+
+Use idempotency keys so repeated requests are processed only once.
+
+10. How would you Optimize Global Latency?
+
+Methods
+
+CDN
+DNS caching
+HTTP/2 or HTTP/3
+Image compression
+Regional data centers
+Read replicas
+Browser caching
+Load balancing
+Edge computing
+Scenario-Based Questions
+1. Website is Slow Only on the First Request
+
+Possible causes:
+
+DNS lookup
+TCP handshake
+TLS handshake
+Cold cache
+JIT compilation
+Database connection creation
+
+Subsequent requests benefit from caching and connection reuse.
+
+2. DNS is Failing Intermittently
+
+Check
+
+DNS server health
+TTL values
+Network connectivity
+Resolver configuration
+Recent DNS record changes
+3. APIs are Fast but Pages are Slow
+
+Possible bottlenecks
+
+Large JavaScript bundles
+Slow browser rendering
+Unoptimized images
+CSS blocking rendering
+Third-party scripts
+
+Backend isn't always the bottleneck.
+
+4. Traffic Suddenly Doubles
+
+Scale
+
+Load Balancer
+Application Servers
+Cache
+Read Replicas
+CDN
+
+Monitor CPU, memory, network, and database load.
+
+5. Login Works but Subsequent Requests Fail Authentication
+
+Possible reasons
+
+Cookie not being sent
+JWT expired
+Invalid session ID
+Incorrect token verification
+Missing Authorization header
+Load balancer without sticky sessions (for session-based auth)
+MCQs
+1. Which component converts domain names into IP addresses?
+
+A. Cache
+B. DNS ✅
+C. HTTP
+D. TCP
+
+2. Which protocol encrypts web communication?
+
+A. FTP
+B. HTTP
+C. HTTPS ✅
+D. SMTP
+
+3. Which protocol guarantees reliable and ordered delivery?
+
+A. UDP
+B. TCP ✅
+C. DNS
+D. ICMP
+
+4. Which component should typically be checked before querying the database?
+
+A. Browser
+B. Cache ✅
+C. DNS
+D. CDN
+
+5. Which statement about HTTP is correct?
+
+A. It is stateful
+B. It remembers previous requests automatically
+C. It is stateless ✅
+D. It always encrypts data
+
+💡 FAANG Interview Tip
+
+For the question "What happens when you type google.com in your browser?", a complete high-level answer is:
+
+1. Browser checks local cache.
+2. DNS resolves the domain name to an IP address.
+3. Browser establishes a TCP connection.
+4. For HTTPS, a TLS handshake is performed.
+5. Browser sends an HTTP request.
+6. Request reaches a Load Balancer.
+7. Load Balancer forwards it to an application server.
+8. Server checks the cache.
+9. On a cache miss, the server queries the database.
+10. Server generates an HTTP response.
+11. Browser downloads HTML, CSS, JavaScript, and other assets.
+12. Browser parses, executes JavaScript, builds the DOM/CSSOM, performs layout and painting, and renders the page 
