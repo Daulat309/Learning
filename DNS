@@ -1,0 +1,704 @@
+DNS (Domain Name System) — One-Page FAANG Interview Revision Notes
+
+Remember in one line:
+DNS translates a Domain Name into an IP Address.
+
+1. What is DNS?
+Human Language                     Computer Language
+
+google.com       ─────────────►      142.250.183.14
+amazon.com       ─────────────►      54.239.28.85
+github.com       ─────────────►      140.82.114.4
+
+DNS = Internet Phonebook
+
+Instead of remembering IP addresses, users remember domain names.
+
+2. Complete DNS Architecture
+                     USER
+                       │
+                       ▼
+              Type "google.com"
+                       │
+                       ▼
+                 Web Browser
+                       │
+        Browser DNS Cache ?
+             │              │
+          YES│              │NO
+             ▼              ▼
+        Return IP      OS DNS Cache ?
+                           │
+                    YES    │    NO
+                      ▼    ▼
+                 Return IP Router Cache ?
+                              │
+                         YES  │ NO
+                              ▼
+                      ISP Recursive Resolver
+                              │
+                     Cache Available?
+                      │             │
+                    YES             NO
+                     │               ▼
+                     │         Root DNS Server
+                     │               │
+                     ▼               ▼
+                 Return IP      TLD (.com)
+                                     │
+                                     ▼
+                           Authoritative DNS
+                                     │
+                                     ▼
+                              Returns IP
+                                     │
+                                     ▼
+                          Recursive Resolver
+                                     │
+                                     ▼
+                             Browser gets IP
+                                     │
+                                     ▼
+                           Connect to Server
+3. DNS Hierarchy
+                     Root (.)
+                       │
+         ┌─────────────┼─────────────┐
+         │             │             │
+       .com          .org          .in
+         │
+         ▼
+    amazon.com
+         │
+         ▼
+ www.amazon.com
+
+Think like folders in Windows.
+
+C:
+ └── Users
+      └── John
+
+Root
+ └── .com
+      └── amazon.com
+4. DNS Lookup Flow (Interview Favorite)
+Step 1
+Browser Cache
+      │
+      ▼
+Step 2
+Operating System Cache
+      │
+      ▼
+Step 3
+Router Cache
+      │
+      ▼
+Step 4
+ISP Recursive Resolver
+      │
+      ▼
+Step 5
+Root Server
+      │
+      ▼
+Step 6
+TLD Server (.com)
+      │
+      ▼
+Step 7
+Authoritative Server
+      │
+      ▼
+Returns IP Address
+      │
+      ▼
+Browser connects to Server
+5. Root vs TLD vs Authoritative
+                Root Server
+
+"I know where .com lives"
+
+             │
+             ▼
+
+              TLD Server
+
+"I know who manages amazon.com"
+
+             │
+             ▼
+
+      Authoritative Server
+
+"I know Amazon's actual IP."
+
+             │
+             ▼
+
+      54.239.xx.xx
+6. Recursive Resolver
+
+Instead of browser asking everyone,
+
+Resolver does all work.
+
+Browser
+
+     │
+
+     ▼
+
+Recursive Resolver
+
+     │
+
+     ▼
+
+Root
+
+     │
+
+     ▼
+
+TLD
+
+     │
+
+     ▼
+
+Authoritative
+
+     │
+
+     ▼
+
+IP Address
+
+Interview Tip
+
+Users never contact Root Server directly.
+
+7. Recursive vs Iterative Lookup
+Recursive
+Browser
+
+     │
+
+     ▼
+
+Resolver
+
+     │
+
+Handles Everything
+
+     │
+
+Returns IP
+
+✔ Easier
+
+✔ Used in practice
+
+Iterative
+Browser
+
+↓
+
+Root
+
+↓
+
+TLD
+
+↓
+
+Authoritative
+
+↓
+
+IP
+
+Browser asks every server.
+
+Rarely used by clients.
+
+8. DNS Cache
+
+DNS cache exists at many levels.
+
+Browser
+    │
+Operating System
+    │
+Router
+    │
+ISP Resolver
+    │
+Authoritative DNS
+
+More cache
+
+↓
+
+Less latency
+
+↓
+
+Less network traffic
+
+9. TTL (Time To Live)
+TTL = 300 seconds
+
+Means
+
+Keep DNS result for
+
+5 minutes
+
+After TTL expires
+
+↓
+
+Ask DNS again.
+
+TTL Tradeoff
+Small TTL
+
+Fresh Data
+
+↓
+
+More DNS Queries
+
+--------------------------
+
+Large TTL
+
+Faster
+
+↓
+
+Old Cache
+
+Interview Question:
+
+Why doesn't Google use TTL = 1 year?
+
+Because changing server IPs would take a year to propagate.
+
+10. DNS Records
+Record	Purpose	Example
+A	Domain → IPv4	google.com → 142.x.x.x
+AAAA	Domain → IPv6	google.com → IPv6
+CNAME	Alias	shop.amazon.com
+MX	Mail Server	Gmail
+NS	Name Server	DNS Provider
+TXT	Verification/SPF/DKIM	Google Verification
+11. Complete Request Journey
+User
+
+ │
+
+ ▼
+
+google.com
+
+ │
+
+ ▼
+
+DNS Lookup
+
+ │
+
+ ▼
+
+IP Address
+
+ │
+
+ ▼
+
+TCP Handshake
+
+ │
+
+ ▼
+
+TLS Handshake
+
+ │
+
+ ▼
+
+HTTP Request
+
+ │
+
+ ▼
+
+Load Balancer
+
+ │
+
+ ▼
+
+Application Server
+
+ │
+
+ ▼
+
+Cache
+
+ │
+
+ ▼
+
+Database
+
+ │
+
+ ▼
+
+HTTP Response
+
+ │
+
+ ▼
+
+Browser
+
+DNS is only the first step.
+
+12. DNS Performance
+Without Cache
+
+Browser
+
+↓
+
+Resolver
+
+↓
+
+Root
+
+↓
+
+TLD
+
+↓
+
+Authoritative
+
+≈ Slow
+
+
+-------------------------
+
+
+With Cache
+
+Browser
+
+↓
+
+Cache Hit
+
+≈ Instant
+13. DNS in Big Companies
+Google
+
+User
+
+↓
+
+Nearest DNS Server
+
+↓
+
+Nearest Google Data Center
+Netflix
+
+User
+
+↓
+
+DNS
+
+↓
+
+Nearest CDN
+
+↓
+
+Video Streams
+Amazon
+
+User
+
+↓
+
+DNS
+
+↓
+
+Nearest AWS Region
+
+↓
+
+Application
+14. Common Interview Questions
+Easy
+
+✔ What is DNS?
+
+✔ Why DNS is needed?
+
+✔ What is an IP Address?
+
+✔ What is TTL?
+
+✔ What is DNS Cache?
+
+Medium
+
+✔ Explain DNS Lookup
+
+✔ Root vs TLD vs Authoritative
+
+✔ Recursive vs Iterative
+
+✔ Explain DNS Records
+
+✔ Why caching?
+
+Advanced
+
+✔ DNS Load Balancing
+
+✔ GeoDNS
+
+✔ Anycast DNS
+
+✔ DNSSEC
+
+✔ Cache Poisoning
+
+✔ Split Horizon DNS
+
+✔ Negative Caching
+
+15. Common Mistakes
+
+❌ DNS stores webpages
+
+✔ DNS stores mappings
+
+❌ Root Server knows every IP
+
+✔ Root only knows TLD Servers
+
+❌ Browser contacts Root Server
+
+✔ Browser contacts Recursive Resolver
+
+❌ DNS only has one server
+
+✔ DNS is distributed worldwide
+
+❌ TTL means request timeout
+
+✔ TTL means cache expiration
+
+16. Memory Tricks
+DNS Resolution
+Browser
+
+↓
+
+OS
+
+↓
+
+Resolver
+
+↓
+
+Root
+
+↓
+
+TLD
+
+↓
+
+Authoritative
+
+Remember
+
+B O R R T A
+
+Big Owls Read Really Thick Atlases
+
+DNS Records
+
+Remember
+
+A Cares About My New Text
+
+A → Address
+
+AAAA → IPv6
+
+CNAME → Alias
+
+MX → Mail
+
+NS → Name Server
+
+TXT → Text
+
+17. FAANG Interview Cheat Sheet
+DNS
+
+↓
+
+Converts
+
+Domain Name
+
+↓
+
+IP Address
+
+----------------------------
+
+Lookup
+
+Browser Cache
+
+↓
+
+OS Cache
+
+↓
+
+Recursive Resolver
+
+↓
+
+Root
+
+↓
+
+TLD
+
+↓
+
+Authoritative
+
+↓
+
+IP Returned
+
+----------------------------
+
+Most Important Records
+
+A
+
+AAAA
+
+CNAME
+
+MX
+
+NS
+
+TXT
+
+----------------------------
+
+TTL
+
+↓
+
+Cache Lifetime
+
+----------------------------
+
+Uses UDP (default)
+
+Uses TCP (large responses / zone transfers)
+
+----------------------------
+
+DNS is
+
+✔ Distributed
+
+✔ Hierarchical
+
+✔ Cached
+
+✔ Highly Scalable
+
+----------------------------
+
+Root
+
+Knows TLD
+
+TLD
+
+Knows Authoritative
+
+Authoritative
+
+Knows Actual IP
+⭐ Final 30-Second Revision (Interview Day)
+DNS = Domain Name System
+
+Purpose:
+Domain Name → IP Address
+
+Lookup Order:
+Browser Cache
+↓
+OS Cache
+↓
+Recursive Resolver
+↓
+Root Server
+↓
+TLD Server
+↓
+Authoritative Server
+↓
+IP Returned
+
+Records:
+A
+AAAA
+CNAME
+MX
+NS
+TXT
+
+TTL = Cache Lifetime
+
+DNS uses UDP by default
+TCP for large responses
+
+Recursive Resolver does the work for clients.
+
+Root → TLD → Authoritative
+
+DNS is Distributed + Hierarchical + Cached.
+
+Interview mantra: "DNS doesn't find data—it finds the server that has the data."
